@@ -19,5 +19,8 @@ extension (s: String)
       case Array(a, b) => Some((a.nn, b.nn))
       case _ => None
 
+  def splitNN(regex: String): List[String] =
+    s.split(regex).nn.map(_.nn).toList
+
 extension [K,V,W](map: Map[K,V])
   def mapValuesS(f: V => W): Map[K, W] = map.view.mapValues(f).toMap
