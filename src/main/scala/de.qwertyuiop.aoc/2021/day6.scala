@@ -16,5 +16,5 @@ def day6(using InputSource): Unit =
 
   val after80 = (0 until 80).foldLeft(agesStart)((ages, _) => step(ages))
   val after256 = (80 until 256).foldLeft(after80)((ages, _) => step(ages))
-  println(s"""Fish after 80 generations:  ${after80.sum})
-             |Fish after 256 generations: ${after256.sum}""".stripMargin
+  println(s"""Fish after 80 generations:  ${after80.sum}
+             |Fish after 256 generations: ${after256.sum}""".stripMargin)
