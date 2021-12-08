@@ -24,3 +24,6 @@ extension (s: String)
 
 extension [K,V,W](map: Map[K,V])
   def mapValuesS(f: V => W): Map[K, W] = map.view.mapValues(f).toMap
+
+extension [A](input: List[A])
+  def countAll: Map[A, Int] = input.groupBy(identity).view.mapValues(_.size).toMap
