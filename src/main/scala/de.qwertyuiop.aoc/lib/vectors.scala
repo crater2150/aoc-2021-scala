@@ -19,7 +19,7 @@ object Vectors:
   trait Vec[T]:
     extension (v: T)
       def +(w: T): T
-      def neighbours: List[T]
+      def neighbours: Vector[T]
 
   given [T : Show]: Show[Vec2D[T]] with
     def show(v: Vec2D[T]): String = show"Vec2D(${v._1}, ${v._2})"
@@ -56,7 +56,7 @@ object Vectors:
         case West => (v._1 - dist, v._2)
 
       def manhattan: T = v._1.abs + v._2.abs
-      def neighbours: List[Vec2D[T]] =
+      def neighbours: Vector[Vec2D[T]] =
         neighbourCoords(2).map(n => v + (n(0), n(1)))
 
   given [T: Monoid]: Monoid[Vec2D[T]] = semiauto.monoid
@@ -67,7 +67,7 @@ object Vectors:
   given [T: Numeric]: Vec[Vec3D[T]] with
     extension (v: Vec3D[T])
       def +(w: Vec3D[T]): Vec3D[T] = (v._1 + w._1, v._2 + w._2, v._3 + w._3)
-      def neighbours: List[Vec3D[T]] =
+      def neighbours: Vector[Vec3D[T]] =
         neighbourCoords(3).map(n => v + (n(0), n(1), n(2)))
 
       def x: T = v._1
@@ -77,7 +77,7 @@ object Vectors:
   given [T: Numeric]: Vec[Vec4D[T]] with
     extension (v: Vec4D[T])
       def +(u: Vec4D[T]): Vec4D[T] = (v._1 + u._1, v._2 + u._2, v._3 + u._3, v._4 + u._4)
-      def neighbours: List[Vec4D[T]] =
+      def neighbours: Vector[Vec4D[T]] =
         neighbourCoords(4).map(n => v + (n(0), n(1), n(2), n(3)))
 
       def x: T = v._1
@@ -88,16 +88,16 @@ object Vectors:
 
   /* compute these only once per type and dimension*/
   import scala.collection.mutable
-  private var _neighbourCache = mutable.Map[(Numeric[_], Int), List[List[_]]]()
-  def neighbourCoords[T](dim: Int)(using n: Numeric[T]): List[List[T]] =
+  private var _neighbourCache = mutable.Map[(Numeric[_], Int), Vector[Vector[_]]]()
+  def neighbourCoords[T](dim: Int)(using n: Numeric[T]): Vector[Vector[T]] =
     _neighbourCache.get((n, dim)) match
       case None =>
-        val self = List.fill(dim)(n.zero)
-        val neighs = List.fill(dim)(List(-n.one, n.zero, n.one)).sequence[List, T]
+        val self = Vector.fill(dim)(n.zero)
+        val neighs = Vector.fill(dim)(Vector(-n.one, n.zero, n.one)).sequence[Vector, T]
           .filter(_ != self)
         _neighbourCache.put((n, dim), neighs)
         neighs
-      case Some(neighs) => neighs.asInstanceOf[List[List[T]]]
+      case Some(neighs) => neighs.asInstanceOf[Vector[Vector[T]]]
 
 object Directions:
   opaque type Dir = Int
