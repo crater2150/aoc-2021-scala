@@ -99,6 +99,10 @@ object Vectors:
         neighs
       case Some(neighs) => neighs.asInstanceOf[Vector[Vector[T]]]
 
+  extension[A](v: IndexedSeq[IndexedSeq[A]]) def get(p: Vec2D[Int]): A = v(p.x)(p.y)
+  extension[A](v: IndexedSeq[IndexedSeq[IndexedSeq[A]]]) def get(p: Vec3D[Int]): A = v(p.x)(p.y)(p.z)
+  extension[A](v: IndexedSeq[IndexedSeq[IndexedSeq[IndexedSeq[A]]]]) def get(p: Vec4D[Int]): A = v(p.x)(p.y)(p.z)(p.w)
+
 object Directions:
   opaque type Dir = Int
   val East: Dir = 0
