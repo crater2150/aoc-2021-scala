@@ -44,7 +44,7 @@ object Octopodes:
       if flashing.isEmpty then
         (f.view.mapValues(v => if v > 9 then 0 else v).toMap, flashed.size + flashing.size)
       else
-        val neighs = flashing.toVector.flatMap(_.neighbours).occurrences
+        val neighs = flashing.toVector.flatMap(_.neighbours).occurrences.mapValuesS(_.toInt)
         val newF = f.map((coord, v) => coord -> (
             if v > 9 || flashing.contains(coord) then 12
             else (v + neighs.getOrElse(coord, 0)).min(11)

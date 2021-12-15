@@ -10,7 +10,7 @@ extension [A](input: List[A])(using CanEqual[A,A])
           h #:: (if keepSeparator then tail else t).split(separator)
 
 extension [A](iterable: Iterable[A])
-  def occurrences: Map[A, Int] = iterable.groupMapReduce(identity)(_ => 1)(_ + _)
+  def occurrences: Map[A, Long] = iterable.groupMapReduce(identity)(_ => 1L)(_ + _)
 
 /* Using -Yexplicit-nulls isn't really ready for use with the java standard
  * library. e.g. String doesn't have `@NotNull` annotations for its methods
