@@ -3,7 +3,7 @@ package de.qwertyuiop.aoc.lib
 import cats.*, cats.implicits.given
 import cats.derived.semiauto
 
-object Vectors: 
+object Vectors:
   import scala.Numeric.Implicits.given
   import scala.compiletime.ops.int.*
   import Directions.*
@@ -58,6 +58,16 @@ object Vectors:
       def manhattan: T = v._1.abs + v._2.abs
       def neighbours: Vector[Vec2D[T]] =
         neighbourCoords(2).map(n => v + (n(0), n(1)))
+
+      def orthoNeighbours(sizeX: T, sizeY: T)(using Ordering[T]): Vector[Vec2D[T]] =
+        val n = summon[Numeric[T]]
+        import math.Ordering.Implicits.infixOrderingOps
+        val vb = collection.immutable.VectorBuilder[(T,T)]()
+        if x > n.zero then vb += ((x - n.one, y))
+        if x < sizeX - n.one then vb += ((x + n.one, y))
+        if y > n.zero then vb += ((x, y - n.one))
+        if y < sizeY - n.one then vb += ((x, y + n.one))
+        vb.result()
 
   given [T: Monoid]: Monoid[Vec2D[T]] = semiauto.monoid
   given [T: Monoid]: Monoid[Vec3D[T]] = semiauto.monoid
