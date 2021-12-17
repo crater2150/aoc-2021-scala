@@ -25,6 +25,9 @@ extension (s: String)
   def splitNN(regex: String): List[String] =
     s.split(regex).nn.map(_.nn).toList
 
+  def padLeft(size: Int, elem: Char): String =
+    elem.toString * (size - s.length) + s
+
 extension [K,V,W](map: Map[K,V])
   def mapValuesS(f: V => W): Map[K, W] = map.view.mapValues(f).toMap
 

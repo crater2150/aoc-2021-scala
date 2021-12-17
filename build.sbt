@@ -14,6 +14,8 @@ lazy val root = project
       "org.typelevel" %% "cats-core" % "2.6.1",
       "org.typelevel" %% "cats-effect" % "3.1.1",
       "org.typelevel" %% "kittens" % "3.0.0-M1",
+      "org.tpolecat" %% "atto-core" % "0.9.5",
+
       )
   )
 
