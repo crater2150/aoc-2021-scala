@@ -12,9 +12,21 @@ object Vectors:
   opaque type Vec3D[T] = (T, T, T)
   opaque type Vec4D[T] = (T, T, T, T)
 
-  def Vec2D[T](x: T, y: T): Vec2D[T] = (x,y)
-  def Vec3D[T](x: T, y: T, z: T): Vec3D[T] = (x,y,z)
-  def Vec4D[T](x: T, y: T, z: T, w: T): Vec4D[T] = (x,y,z,w)
+  object Vec2D:
+    def apply[T](x: T, y: T): Vec2D[T] = (x,y)
+    def allCoords(matrix: IndexedSeq[IndexedSeq[_]]): Iterable[Vec2D[Int]] =
+      (
+        for
+          x <- 0 until matrix.size
+          y <- 0 until matrix.headOption.map(_.size).getOrElse(0)
+        yield (x, y)
+      )
+
+  object Vec3D:
+    def apply[T](x: T, y: T, z: T): Vec3D[T] = (x,y,z)
+
+  object Vec4D:
+    def apply[T](x: T, y: T, z: T, w: T): Vec4D[T] = (x,y,z,w)
 
   trait Vec[T]:
     extension (v: T)
@@ -68,6 +80,10 @@ object Vectors:
         if y > n.zero then vb += ((x, y - n.one))
         if y < sizeY - n.one then vb += ((x, y + n.one))
         vb.result()
+
+      def orthoNeighbours: Vector[Vec2D[T]] =
+        val n = summon[Numeric[T]]
+        Vector((x - n.one, y), (x + n.one, y), (x, y - n.one), (x, y + n.one))
 
   given [T: Monoid]: Monoid[Vec2D[T]] = semiauto.monoid
   given [T: Monoid]: Monoid[Vec3D[T]] = semiauto.monoid

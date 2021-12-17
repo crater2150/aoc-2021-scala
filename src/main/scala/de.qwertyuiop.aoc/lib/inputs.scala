@@ -29,3 +29,7 @@ def flatInputF[A, C[_]](format: String => IterableOnce[A] = identity)(coll: coll
   inputLines.flatMap(format).to(coll)
 
 def boolChar(trueChar: Char): String => Vector[Boolean] = _.map(_ == trueChar).toVector
+
+object InputFormats:
+  def intMatrix(using InputSource): Vector[Vector[Int]] = input(_.map(_ - '0').toVector).toVector
+  def longMatrix(using InputSource): Vector[Vector[Long]] = input(_.map(c => (c - '0').toLong).toVector).toVector
