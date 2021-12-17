@@ -1,4 +1,5 @@
 package de.qwertyuiop.aoc.lib
+import util.chaining.given
 
 /* for splitting input with separator lines */
 extension [A](input: List[A])(using CanEqual[A,A])
@@ -29,3 +30,6 @@ extension [K,V,W](map: Map[K,V])
 
 extension [A](input: List[A])
   def countAll: Map[A, Int] = input.groupBy(identity).view.mapValues(_.size).toMap
+
+extension [A](a: A)
+  def |[B](f: (A) => B): B = a.pipe(f)
