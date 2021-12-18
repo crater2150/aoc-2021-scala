@@ -89,7 +89,6 @@ object Vectors:
   given [T: Monoid]: Monoid[Vec3D[T]] = semiauto.monoid
   given [T: Monoid]: Monoid[Vec4D[T]] = semiauto.monoid
 
-
   given [T: Numeric]: Vec[Vec3D[T]] with
     extension (v: Vec3D[T])
       def +(w: Vec3D[T]): Vec3D[T] = (v._1 + w._1, v._2 + w._2, v._3 + w._3)
