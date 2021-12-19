@@ -22,16 +22,50 @@ object Vectors:
         yield (x, y)
       )
 
+    def parse[T: Numeric](in: String): Option[Vec2D[T]] =
+      in match
+        case s"$x,$y" =>
+          for xt <- Numeric[T].parseString(x)
+              yt <- Numeric[T].parseString(y)
+          yield Vec2D(xt,yt)
+        case _ => None
+
   object Vec3D:
     def apply[T](x: T, y: T, z: T): Vec3D[T] = (x,y,z)
+
+    def parse[T: Numeric](in: String): Option[Vec3D[T]] =
+      in match
+        case s"$x,$y,$z" =>
+          for xt <- Numeric[T].parseString(x)
+              yt <- Numeric[T].parseString(y)
+              zt <- Numeric[T].parseString(z)
+          yield Vec3D(xt,yt,zt)
+        case _ => None
 
   object Vec4D:
     def apply[T](x: T, y: T, z: T, w: T): Vec4D[T] = (x,y,z,w)
 
-  trait Vec[T]:
-    extension (v: T)
-      def +(w: T): T
-      def neighbours: Vector[T]
+    def parse[T: Numeric](in: String): Option[Vec4D[T]] =
+      in match
+        case s"$x,$y,$z,$w" =>
+          for xt <- Numeric[T].parseString(x)
+              yt <- Numeric[T].parseString(y)
+              zt <- Numeric[T].parseString(z)
+              wt <- Numeric[T].parseString(w)
+          yield Vec4D(xt,yt,zt,wt)
+        case _ => None
+
+  trait Vec[V, E]:
+    def parse(in: String): Option[V]
+
+    extension (a: V)
+      def +(b: V): V
+      def -(b: V): V
+      def *(scale: E): V
+
+      def combine(b: V)(f: (E, E) => E): V
+
+      def neighbours: Vector[V]
 
   given [T : Show]: Show[Vec2D[T]] with
     def show(v: Vec2D[T]): String = show"Vec2D(${v._1}, ${v._2})"
@@ -40,36 +74,49 @@ object Vectors:
   given [T : Show]: Show[Vec4D[T]] with
     def show(v: Vec4D[T]): String = show"Vec4D(${v._1}, ${v._2}, ${v._3}, ${v._4})"
 
-  given [T: Numeric]: Vec[Vec2D[T]] with
-    extension (v: Vec2D[T])
-      def +(w: Vec2D[T]): Vec2D[T] = (v._1 + w._1, v._2 + w._2)
-      def -(w: Vec2D[T]): Vec2D[T] = (v._1 - w._1, v._2 - w._2)
-      def *(x: T): Vec2D[T] = (v._1 * x, v._2 * x)
+  given Functor[Vec2D] with
+    def map[A, B](fa: Vec2D[A])(f: A => B): Vec2D[B] = Vec2D(f(fa._1), f(fa._2))
 
-      def x: T = v._1
-      def y: T = v._2
+  given Functor[Vec3D] with
+    def map[A, B](fa: Vec3D[A])(f: A => B): Vec3D[B] = Vec3D(f(fa._1), f(fa._2), f(fa._3))
+
+  given Functor[Vec4D] with
+    def map[A, B](fa: Vec4D[A])(f: A => B): Vec4D[B] = Vec4D(f(fa._1), f(fa._2), f(fa._3), f(fa._4))
+
+  given [T: Numeric]: Vec[Vec2D[T], T] with
+    def parse(in: String): Option[Vec2D[T]] = Vec2D.parse(in)
+
+    extension (a: Vec2D[T])
+      def +(b: Vec2D[T]): Vec2D[T] = (a.x + b.x, a.y + b.y)
+      def -(b: Vec2D[T]): Vec2D[T] = (a.x - b.x, a.y - b.y)
+      def *(s: T): Vec2D[T] = (a.x * s, a.y * s)
+
+      def combine(b: Vec2D[T])(f: (T, T) => T): Vec2D[T] = Vec2D(f(a.x, b.x), f(a.y, b.y))
+
+      def x: T = a._1
+      def y: T = a._2
 
       def rot(deg: Dir): Vec2D[T] = deg match
-        case North => (-v._2, v._1)
-        case West => (-v._1, -v._2)
-        case South => (v._2, -v._1)
-        case East => v
+        case North => (-a.y, a.x)
+        case West => (-a.x, -a.y)
+        case South => (a.y, -a.x)
+        case East => a
 
-      def left(deg: Int): Vec2D[T] = repeat[Vec2D[T]](deg / 90)(_.rotLeft)(v)
-      def right(deg: Int): Vec2D[T] = repeat[Vec2D[T]](deg / 90)(_.rotRight)(v)
+      def left(deg: Int): Vec2D[T] = repeat[Vec2D[T]](deg / 90)(_.rotLeft)(a)
+      def right(deg: Int): Vec2D[T] = repeat[Vec2D[T]](deg / 90)(_.rotRight)(a)
 
-      def rotLeft: Vec2D[T] = (-v._2, v._1)
-      def rotRight: Vec2D[T] = (v._2, -v._1)
+      def rotLeft: Vec2D[T] = (-a.y, a.x)
+      def rotRight: Vec2D[T] = (a.y, -a.x)
 
       def move(dir: Dir, dist: T): Vec2D[T] = dir match
-        case North => (v._1, v._2 + dist)
-        case South => (v._1, v._2 - dist)
-        case East => (v._1 + dist, v._2)
-        case West => (v._1 - dist, v._2)
+        case North => (a.x, a.y + dist)
+        case South => (a.x, a.y - dist)
+        case East => (a.x + dist, a.y)
+        case West => (a.x - dist, a.y)
 
-      def manhattan: T = v._1.abs + v._2.abs
+      def manhattan: T = a.x.abs + a._2.abs
       def neighbours: Vector[Vec2D[T]] =
-        neighbourCoords(2).map(n => v + (n(0), n(1)))
+        neighbourCoords(2).map(n => a + (n(0), n(1)))
 
       def orthoNeighbours(sizeX: T, sizeY: T)(using Ordering[T]): Vector[Vec2D[T]] =
         val n = summon[Numeric[T]]
@@ -89,26 +136,43 @@ object Vectors:
   given [T: Monoid]: Monoid[Vec3D[T]] = semiauto.monoid
   given [T: Monoid]: Monoid[Vec4D[T]] = semiauto.monoid
 
-  given [T: Numeric]: Vec[Vec3D[T]] with
-    extension (v: Vec3D[T])
-      def +(w: Vec3D[T]): Vec3D[T] = (v._1 + w._1, v._2 + w._2, v._3 + w._3)
+  given [T: Numeric]: Vec[Vec3D[T], T] with
+    def parse(in: String): Option[Vec3D[T]] = Vec3D.parse(in)
+
+    extension (a: Vec3D[T])
+      def +(b: Vec3D[T]): Vec3D[T] = (a.x + b.x, a.y + b.y, a.z + b.z)
+      def -(b: Vec3D[T]): Vec3D[T] = (a.x - b.x, a.y - b.y, a.z - b.z)
+      def *(s: T): Vec3D[T] = (a.x * s, a.y * s, a.z * s)
+
+      def combine(b: Vec3D[T])(f: (T, T) => T): Vec3D[T] = Vec3D(f(a.x, b.x), f(a.y, b.y), f(a.z, b.z))
+
+      /** elementwise multiplication */
+      def ⊙(b: Vec3D[T]): Vec3D[T] = (a.x * b.x, a.y * b.y, a.z * b.z)
+
       def neighbours: Vector[Vec3D[T]] =
-        neighbourCoords(3).map(n => v + (n(0), n(1), n(2)))
+        neighbourCoords(3).map(n => a + (n(0), n(1), n(2)))
 
-      def x: T = v._1
-      def y: T = v._2
-      def z: T = v._3
+      def x: T = a._1
+      def y: T = a._2
+      def z: T = a._3
 
-  given [T: Numeric]: Vec[Vec4D[T]] with
-    extension (v: Vec4D[T])
-      def +(u: Vec4D[T]): Vec4D[T] = (v._1 + u._1, v._2 + u._2, v._3 + u._3, v._4 + u._4)
+  given [T: Numeric]: Vec[Vec4D[T], T] with
+    def parse(in: String): Option[Vec4D[T]] = Vec4D.parse(in)
+
+    extension (a: Vec4D[T])
+      def +(b: Vec4D[T]): Vec4D[T] = (a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w)
+      def -(b: Vec4D[T]): Vec4D[T] = (a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w)
+      def *(s: T): Vec4D[T] = (a.x * s, a.y * s, a.z * s, a.w * s)
+
+      def combine(b: Vec4D[T])(f: (T, T) => T): Vec4D[T] = Vec4D(f(a.x, b.x), f(a.y, b.y), f(a.z, b.z), f(a.w, b.w))
+
       def neighbours: Vector[Vec4D[T]] =
-        neighbourCoords(4).map(n => v + (n(0), n(1), n(2), n(3)))
+        neighbourCoords(4).map(n => a + (n(0), n(1), n(2), n(3)))
 
-      def x: T = v._1
-      def y: T = v._2
-      def z: T = v._3
-      def w: T = v._4
+      def x: T = a._1
+      def y: T = a._2
+      def z: T = a._3
+      def w: T = a._4
 
 
   /* compute these only once per type and dimension*/
