@@ -118,6 +118,10 @@ object Vectors:
       def neighbours: Vector[Vec2D[T]] =
         neighbourCoords(2).map(n => a + (n(0), n(1)))
 
+      def kernel3x3: Vector[Vec2D[T]] =
+        val (pre,post) = neighbours.splitAt(4)
+        pre.appended(a) ++ post
+
       def orthoNeighbours(sizeX: T, sizeY: T)(using Ordering[T]): Vector[Vec2D[T]] =
         val n = summon[Numeric[T]]
         import math.Ordering.Implicits.infixOrderingOps
