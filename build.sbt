@@ -16,7 +16,12 @@ lazy val root = project
       "org.typelevel" %% "kittens" % "3.0.0-M1",
       "org.tpolecat" %% "atto-core" % "0.9.5",
 
-      )
+      ),
+    console / initialCommands := """
+    import de.qwertyuiop.aoc.inputSource, de.qwertyuiop.aoc.lib.{*, given}, de.qwertyuiop.aoc.`2021`.{*, given}
+    import cats.*, cats.data.*, cats.implicits.given
+    import scala.util.chaining.given
+    """
   )
 
 Runtime / unmanagedSources += baseDirectory.value / "input"
